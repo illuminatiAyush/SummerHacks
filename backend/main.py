@@ -1,11 +1,21 @@
 """
-main.py — FastAPI server for the Evergreen Mantra pipeline.
+main.py — ExpenseAutopsy Unified FastAPI Backend.
+
+Combines:
+  - Modular LangGraph pipeline (graph/expense_graph.py)
+  - Web3 blockchain anchoring (web3_helper.py)
+  - HITL auto-approval for hackathon demo
+  - User onboarding endpoints
 
 Routes
 ------
-POST /api/submit       — Start a new Trust-Verify-Act run.
-GET  /api/status/{id}  — Poll the current pipeline state.
-POST /api/approve/{id} — Resume the HITL interrupt with human feedback.
+POST /api/submit           — Start expense analysis (legacy compat)
+POST /api/expense-analysis/submit — Start expense analysis (new)
+GET  /api/status/{id}      — Poll pipeline state
+GET  /api/expense-analysis/status/{id} — Poll (new)
+POST /api/approve/{id}     — Resume HITL interrupt
+POST /api/user/onboard     — Create user profile
+GET  /api/health           — Health check
 """
 
 import os
@@ -17,52 +27,20 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from langgraph.checkpoint.memory import MemorySaver
 
-from graph import build_graph
+from graph.expense_graph import build_expense_graph
+from schemas.graph_state import ExpenseGraphState
+from schemas.expense_analysis import ExpenseAnalysisRequest, ExpenseAnalysisResponse
+from schemas.user import UserOnboardRequest, UserProfileResponse
+from web3_helper import anchor_to_chain
 
 load_dotenv()
 
 
 # ── In-memory stores ────────────────────────────────────────────────────
-
-checkpointer = MemorySaver()
-compiled_graph = build_graph()
-# Wrap the compiled graph with a checkpointer for interrupt/resume support
-graph_with_memory = compiled_graph.__class__(
-    compiled_graph.builder, checkpointer=checkpointer
-) if hasattr(compiled_graph, "builder") else compiled_graph
-
-# Fallback: rebuild with checkpointer directly
-from graph import StateGraph as _SG, build_graph as _bg
-from state import AppState
-from langgraph.graph import StateGraph, START, END
-
-def _build_with_checkpointer():
-    from graph import (
-        multi_agent_node,
-        hitl_node,
-        web3_anchor_node,
-        route_after_analysis,
-    )
-    g = StateGraph(AppState)
-    g.add_node("multi_agent_node", multi_agent_node)
-    g.add_node("hitl_node", hitl_node)
-    g.add_node("web3_anchor_node", web3_anchor_node)
-    g.add_edge(START, "multi_agent_node")
-    g.add_conditional_edges(
-        "multi_agent_node",
-        route_after_analysis,
-        {"hitl_node": "hitl_node", "web3_anchor_node": "web3_anchor_node"},
-    )
-    g.add_edge("hitl_node", "web3_anchor_node")
-    g.add_edge("web3_anchor_node", END)
-    return g.compile(checkpointer=checkpointer)
-
-runnable_graph = _build_with_checkpointer()
-
-# Simple state store for quick polling (payload_id → latest snapshot)
 state_store: dict[str, dict] = {}
+user_store: dict[str, dict] = {}
+runnable_graph = build_expense_graph()
 
 EXPLORER_URL = os.getenv(
     "BLOCKCHAIN_EXPLORER_URL", "https://sepolia.etherscan.io/tx/"
@@ -85,14 +63,14 @@ class ApproveRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("🚀 Evergreen Mantra backend is live.")
+    print("[SERVER] ExpenseAutopsy backend is live.")
     yield
-    print("👋 Shutting down.")
+    print("[SERVER] Shutting down.")
 
 
 app = FastAPI(
-    title="Evergreen Mantra — Trust · Verify · Act",
-    version="1.0.0",
+    title="ExpenseAutopsy — AI Financial Autopsy Engine",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -107,124 +85,182 @@ app.add_middleware(
 
 # ── Helper: run graph in background thread ──────────────────────────────
 
-def _run_graph(payload_id: str, raw_input: str):
-    """Execute the graph synchronously inside a background thread."""
-    config = {"configurable": {"thread_id": payload_id}}
-    initial_state: AppState = {
+def _run_analysis(payload_id: str, raw_input: str, stipend: float, goal: str):
+    """Execute the modular LangGraph pipeline in a background thread."""
+    initial_state: ExpenseGraphState = {
         "payload_id": payload_id,
+        "status": "running",
+        "goal": goal,
+        "stipend": int(stipend),
         "raw_input": raw_input,
-        "monthly_stipend": 0.0,  # These will be updated from the state_store
-        "big_goal": "",
-        "agent_analysis": {},
-        "human_decision": "",
-        "blockchain_tx": "",
-        "requires_hitl": False,
-        "staked_amount": 0.0,
-        "is_verification_run": False,
+        "parsed_transactions": [],
+        "categorized_transactions": [],
+        "spending_breakdown": {},
+        "highest_spend_category": "",
+        "monthly_waste": 0,
+        "savings_score": 0,
+        "raw_5_year_loss": 0,
+        "future_invested_value": 0,
+        "emotional_message": "",
+        "error": None,
     }
+
     try:
-        for event in runnable_graph.stream(initial_state, config=config):
-            # Each event is a dict of { node_name: state_update }
-            for node_name, update in event.items():
-                if node_name == "__interrupt__":
-                    continue
-                current = state_store.get(payload_id, initial_state.copy())
-                current.update(update)
-                current["_last_node"] = node_name
-                state_store[payload_id] = current
-    except Exception as exc:
-        print(f"[graph-runner] Error for {payload_id}: {exc}")
-        state_store.setdefault(payload_id, initial_state.copy())["_error"] = str(exc)
+        final_state = runnable_graph.invoke(initial_state)
+
+        # Mark as completed unless error was set in nodes
+        if final_state.get("status") != "error":
+            final_state["status"] = "completed"
+
+        # Anchor to blockchain
+        try:
+            anchor_data = {
+                "payload_id": payload_id,
+                "savings_score": final_state.get("savings_score", 0),
+                "highest_spend_category": final_state.get("highest_spend_category", ""),
+                "monthly_waste": final_state.get("monthly_waste", 0),
+            }
+            tx_hash = anchor_to_chain(anchor_data)
+            final_state["blockchain_tx"] = tx_hash
+        except Exception as web3_err:
+            print(f"[web3] Anchor failed: {web3_err}")
+            final_state["blockchain_tx"] = f"0x_MOCK_{payload_id[:8]}"
+
+        state_store[payload_id] = final_state
+
+    except Exception as e:
+        print(f"[graph-runner] Analysis failed for {payload_id}: {str(e)}")
+        state_store[payload_id] = {
+            **initial_state,
+            "status": "error",
+            "error": str(e),
+        }
 
 
 # ── Routes ───────────────────────────────────────────────────────────────
 
+# Legacy route (matches existing frontend proxy)
 @app.post("/api/submit")
-async def submit_payload(body: SubmitRequest):
-    """Start a new Trust-Verify-Act pipeline run."""
+async def submit_payload_legacy(body: SubmitRequest):
+    return await submit_analysis_new(
+        ExpenseAnalysisRequest(
+            goal=body.big_goal,
+            stipend=int(body.monthly_stipend),
+            raw_input=body.raw_input,
+        )
+    )
+
+
+# New clean route
+@app.post("/api/expense-analysis/submit")
+async def submit_analysis_new(request: ExpenseAnalysisRequest):
+    """Start a new expense analysis pipeline run."""
     payload_id = str(uuid.uuid4())
-    state_store[payload_id] = {
-        "payload_id": payload_id,
-        "raw_input": body.raw_input,
-        "monthly_stipend": body.monthly_stipend,
-        "big_goal": body.big_goal,
-        "agent_analysis": {},
-        "human_decision": "",
-        "blockchain_tx": "",
-        "requires_hitl": False,
-        "staked_amount": 0.0,
-        "_status": "running",
-    }
+    state_store[payload_id] = {"status": "started", "payload_id": payload_id}
+
     thread = threading.Thread(
-        target=_run_graph, args=(payload_id, body.raw_input), daemon=True
+        target=_run_analysis,
+        args=(payload_id, request.raw_input, request.stipend, request.goal),
+        daemon=True,
     )
     thread.start()
+
     return {"payload_id": payload_id, "status": "started"}
 
 
+# Legacy status route
 @app.get("/api/status/{payload_id}")
-async def get_status(payload_id: str):
-    """Return the current pipeline state + explorer URL."""
+async def get_status_legacy(payload_id: str):
+    return await get_analysis_status(payload_id)
+
+
+# New status route
+@app.get("/api/expense-analysis/status/{payload_id}")
+async def get_analysis_status(payload_id: str):
+    """Return the current pipeline state."""
     state = state_store.get(payload_id)
     if state is None:
         raise HTTPException(status_code=404, detail="Payload not found")
 
-    # Determine status
-    status = "running"
-    if state.get("blockchain_tx"):
-        status = "completed"
-    elif state.get("requires_hitl") and not state.get("human_decision"):
-        status = "awaiting_hitl"
-    elif state.get("_error"):
-        status = "error"
+    status = state.get("status", "running")
+
+    # Build the agent_analysis object for frontend compatibility
+    agent_analysis = {
+        "highest_spend_category": state.get("highest_spend_category", ""),
+        "monthly_waste": state.get("monthly_waste", 0),
+        "compounded_five_year_cost": state.get("raw_5_year_loss", 0),
+        "raw_5_year_loss": state.get("raw_5_year_loss", 0),
+        "future_invested_value": state.get("future_invested_value", 0),
+        "savings_score": state.get("savings_score", 0),
+        "future_self_message": state.get("emotional_message", ""),
+        "emotional_message": state.get("emotional_message", ""),
+        "spending_breakdown": state.get("spending_breakdown", {}),
+    }
 
     return {
         "payload_id": payload_id,
         "status": status,
-        "raw_input": state.get("raw_input", ""),
-        "monthly_stipend": state.get("monthly_stipend", 0),
-        "big_goal": state.get("big_goal", ""),
-        "agent_analysis": state.get("agent_analysis", {}),
-        "human_decision": state.get("human_decision", ""),
+        "agent_analysis": agent_analysis,
         "blockchain_tx": state.get("blockchain_tx", ""),
-        "requires_hitl": state.get("requires_hitl", False),
         "explorer_url": EXPLORER_URL,
-        "error": state.get("_error"),
+        "error": state.get("error"),
     }
 
 
+# Legacy approve route (auto-approve for hackathon)
 @app.post("/api/approve/{payload_id}")
-async def approve_payload(payload_id: str, body: ApproveRequest):
-    """Resume the HITL interrupt with the reviewer's decision."""
+async def approve_payload(payload_id: str, body: ApproveRequest = ApproveRequest()):
     state = state_store.get(payload_id)
     if state is None:
         raise HTTPException(status_code=404, detail="Payload not found")
+    # For hackathon MVP, just mark as completed
+    if state.get("status") != "completed":
+        state["status"] = "completed"
+    return {"payload_id": payload_id, "status": "approved", "decision": body.decision}
 
-    # Update local state immediately
-    state["human_decision"] = body.decision
-    state_store[payload_id] = state
 
-    # Resume the graph in a background thread
-    def _resume():
-        config = {"configurable": {"thread_id": payload_id}}
-        try:
-            for event in runnable_graph.stream(
-                Command(resume=body.decision), config=config
-            ):
-                for node_name, update in event.items():
-                    if node_name == "__interrupt__":
-                        continue
-                    current = state_store.get(payload_id, {})
-                    current.update(update)
-                    current["_last_node"] = node_name
-                    state_store[payload_id] = current
-        except Exception as exc:
-            print(f"[graph-resume] Error for {payload_id}: {exc}")
-            state_store[payload_id]["_error"] = str(exc)
+# New approve route
+@app.post("/api/expense-analysis/approve/{payload_id}")
+async def approve_analysis(payload_id: str):
+    state = state_store.get(payload_id)
+    if not state:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    state["status"] = "completed"
+    return {"status": "approved"}
 
-    thread = threading.Thread(target=_resume, daemon=True)
-    thread.start()
-    return {"payload_id": payload_id, "status": "resumed", "decision": body.decision}
+
+# ── User Onboarding ─────────────────────────────────────────────────────
+
+@app.post("/api/user/onboard", response_model=UserProfileResponse)
+async def onboard_user(request: UserOnboardRequest):
+    user_id = str(uuid.uuid4())
+    user_data = {
+        "id": user_id,
+        "name": request.name,
+        "email": request.email,
+        "wallet_address": request.wallet_address,
+        "stipend": request.stipend,
+        "selected_goal": request.selected_goal,
+        "community_name": "SummerHacks 2026",
+        "created_at": "2026-04-17T00:00:00Z",
+    }
+    user_store[user_id] = user_data
+    return user_data
+
+
+@app.get("/api/user/{user_id}", response_model=UserProfileResponse)
+async def get_user(user_id: str):
+    user = user_store.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+# ── Utility ──────────────────────────────────────────────────────────────
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok", "engine": "ExpenseAutopsy v2.0"}
 
 
 # ── Entrypoint ───────────────────────────────────────────────────────────

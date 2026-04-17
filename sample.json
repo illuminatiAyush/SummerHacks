@@ -1,0 +1,42 @@
+[
+    {
+        "merchant": "Swiggy",
+        "amount": 450,
+        "date": "2026-04-10"
+    },
+    {
+        "merchant": "Zomato",
+        "amount": 620,
+        "date": "2026-04-12"
+    },
+    {
+        "merchant": "Amazon",
+        "amount": 2500,
+        "date": "2026-04-13"
+    },
+    {
+        "merchant": "Uber",
+        "amount": 320,
+        "date": "2026-04-14"
+    },
+    {
+        "merchant": "Netflix",
+        "amount": 649,
+        "date": "2026-04-01"
+    },
+    {
+        "merchant": "Starbucks",
+        "amount": 380,
+        "date": "2026-04-15"
+    },
+    {
+        "merchant": "Swiggy",
+        "amount": 510,
+        "date": "2026-04-16"
+    },
+    {
+        "merchant": "Myntra",
+        "amount": 1800,
+        "date": "2026-04-17"
+    }
+]
