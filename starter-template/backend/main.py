@@ -153,6 +153,45 @@ async def create_escrow(request: dict):
         "message": "Funds locked in escrow"
     }
 
+@app.get("/api/leaderboard/{community_name}")
+async def get_leaderboard(community_name: str, limit: int = 50):
+    # Mock leaderboard data
+    return [
+        {
+            "rank": 1,
+            "user_id": "user-1",
+            "name": "Rahul",
+            "community_name": community_name,
+            "savings_score": 82,
+            "streak_days": 28,
+            "total_saved": 4200,
+            "reduction_percentage": 45,
+            "challenges_completed": 3
+        },
+        {
+            "rank": 2,
+            "user_id": "user-2",
+            "name": "Priya",
+            "community_name": community_name,
+            "savings_score": 76,
+            "streak_days": 21,
+            "total_saved": 3600,
+            "reduction_percentage": 38,
+            "challenges_completed": 2
+        },
+        {
+            "rank": 3,
+            "user_id": "user-you",
+            "name": "You",
+            "community_name": community_name,
+            "savings_score": 71,
+            "streak_days": 14,
+            "total_saved": 2900,
+            "reduction_percentage": 32,
+            "challenges_completed": 1
+        }
+    ]
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -68,65 +68,72 @@ export default function MoneyMirrorCard({
         </div>
       </div>
 
-      <div className="flex-1 min-h-[250px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="colorRaw" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-              </linearGradient>
-              <linearGradient id="colorInvested" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-            <XAxis 
-              dataKey="year" 
-              stroke="#64748b" 
-              fontSize={12} 
-              tickLine={false} 
-              axisLine={false} 
-            />
-            <YAxis 
-              stroke="#64748b" 
-              fontSize={12} 
-              tickLine={false} 
-              axisLine={false} 
-              tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#0f172a', 
-                border: '1px solid #334155',
-                borderRadius: '12px',
-                color: '#fff'
-              }}
-              itemStyle={{ color: '#fff' }}
-              formatter={(value: any) => [`₹${value.toLocaleString()}`, '']}
-            />
-            <Legend iconType="circle" />
-            <Area 
-              type="monotone" 
-              dataKey="raw" 
-              name="Raw Spend"
-              stroke="#f43f5e" 
-              fillOpacity={1} 
-              fill="url(#colorRaw)" 
-              strokeWidth={3}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="invested" 
-              name="If Invested @ 8%"
-              stroke="#10b981" 
-              fillOpacity={1} 
-              fill="url(#colorInvested)" 
-              strokeWidth={3}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+      <div className="flex-1 min-h-[300px] w-full relative">
+        {monthlyWaste === 0 ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-center p-4">
+            <TrendingUp size={48} className="mb-4 opacity-20" />
+            <p className="text-sm">Provide more transactions to see your financial future.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorRaw" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorInvested" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis 
+                dataKey="year" 
+                stroke="#64748b" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+              />
+              <YAxis 
+                stroke="#64748b" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#0f172a', 
+                  border: '1px solid #334155',
+                  borderRadius: '12px',
+                  color: '#fff'
+                }}
+                itemStyle={{ color: '#fff' }}
+                formatter={(value: any) => [`₹${value.toLocaleString()}`, '']}
+              />
+              <Legend iconType="circle" />
+              <Area 
+                type="monotone" 
+                dataKey="raw" 
+                name="Raw Spend"
+                stroke="#f43f5e" 
+                fillOpacity={1} 
+                fill="url(#colorRaw)" 
+                strokeWidth={3}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="invested" 
+                name="If Invested @ 8%"
+                stroke="#10b981" 
+                fillOpacity={1} 
+                fill="url(#colorInvested)" 
+                strokeWidth={3}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       <div className="mt-8 p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 flex gap-4 items-center">

@@ -27,34 +27,41 @@ export default function SpendingBreakdownCard({ breakdown }: SpendingBreakdownCa
       </div>
 
       <div className="flex-1 space-y-6">
-        {items.map(([category, amount], index) => {
-          const percentage = (amount / total) * 100;
-          
-          return (
-            <div key={category} className="space-y-2">
-              <div className="flex justify-between items-end">
-                <span className="text-sm font-semibold text-slate-300">{category}</span>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-white">₹{amount.toLocaleString()}</span>
-                  <span className="text-xs text-slate-500 ml-2">{percentage.toFixed(0)}%</span>
+        {items.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-slate-500 text-center">
+            <ListChecks size={48} className="mb-4 opacity-20" />
+            <p className="text-sm">No transactions to categorize.</p>
+          </div>
+        ) : (
+          items.map(([category, amount], index) => {
+            const percentage = (amount / total) * 100;
+            
+            return (
+              <div key={category} className="space-y-2">
+                <div className="flex justify-between items-end">
+                  <span className="text-sm font-semibold text-slate-300">{category}</span>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-white">₹{amount.toLocaleString()}</span>
+                    <span className="text-xs text-slate-500 ml-2">{percentage.toFixed(0)}%</span>
+                  </div>
+                </div>
+                <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ duration: 1, delay: 0.2 + (index * 0.1) }}
+                    className={cn(
+                      "h-full rounded-full bg-gradient-to-r",
+                      index === 0 ? "from-indigo-500 to-purple-500" :
+                      index === 1 ? "from-purple-500 to-pink-500" :
+                      index === 2 ? "from-pink-500 to-orange-500" : "from-slate-600 to-slate-400"
+                    )}
+                  />
                 </div>
               </div>
-              <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={{ duration: 1, delay: 0.2 + (index * 0.1) }}
-                  className={cn(
-                    "h-full rounded-full bg-gradient-to-r",
-                    index === 0 ? "from-indigo-500 to-purple-500" :
-                    index === 1 ? "from-purple-500 to-pink-500" :
-                    index === 2 ? "from-pink-500 to-orange-500" : "from-slate-600 to-slate-400"
-                  )}
-                />
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       <div className="mt-8 pt-6 border-t border-slate-700/50">
