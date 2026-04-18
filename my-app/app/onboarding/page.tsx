@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Wallet, Target, User, Mail, DollarSign } from "lucide-react";
 import { createProfile } from "@/lib/supabase";
-import Navbar from "@/components/layout/Navbar";
 
 const GOALS = [
   { value: "Bike", label: "Buy a Bike", emoji: "🏍️" },
@@ -53,9 +52,8 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
-      <Navbar />
-      <div className="max-w-2xl mx-auto px-6 pt-16 pb-32">
+    <div className="min-h-screen bg-white text-black font-sans">
+      <div className="max-w-2xl mx-auto px-6 pt-6 pb-32">
         {/* Progress */}
         <div className="flex items-center gap-2 mb-12">
           {[1, 2, 3].map((s) => (
@@ -74,12 +72,12 @@ export default function OnboardingPage() {
             <span className="w-1.5 h-1.5 bg-accent rounded-full mr-2 animate-pulse" />
             Onboarding Protocol
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif tracking-tight mb-3 text-foreground">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 text-black">
             {step === 1 && "Who are you?"}
             {step === 2 && "Your financial baseline."}
             {step === 3 && "Choose your target."}
           </h1>
-          <p className="text-lg text-secondary font-light mb-12">
+          <p className="text-lg text-gray-500 font-medium mb-12">
             {step === 1 && "We need to know who we're building accountability for."}
             {step === 2 && "Set your monthly income and connect your wallet."}
             {step === 3 && "What are you saving towards? This drives your emotional coaching."}
@@ -89,16 +87,16 @@ export default function OnboardingPage() {
         {/* Step 1: Identity */}
         {step === 1 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <div className="bg-surface border border-border rounded-xl p-6 space-y-5">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6 space-y-5">
               <div>
-                <label className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2 block">Full Name</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-accent transition-colors font-medium"
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:border-black transition-colors font-bold"
                     placeholder="Enter your name"
                   />
                 </div>
@@ -130,16 +128,16 @@ export default function OnboardingPage() {
         {/* Step 2: Financial Baseline */}
         {step === 2 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <div className="bg-surface border border-border rounded-xl p-6 space-y-5">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6 space-y-5">
               <div>
-                <label className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2 block">Monthly Income / Stipend (₹)</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Monthly Income / Stipend (₹)</label>
                 <div className="relative">
-                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="number"
                     value={form.monthly_income}
                     onChange={(e) => setForm({ ...form, monthly_income: e.target.value })}
-                    className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted focus:outline-none focus:border-accent transition-colors font-medium font-mono"
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:border-black transition-colors font-bold font-mono"
                     placeholder="15000"
                   />
                 </div>
@@ -184,8 +182,8 @@ export default function OnboardingPage() {
                   onClick={() => setForm({ ...form, financial_goal: goal.value })}
                   className={`p-5 rounded-xl border transition-all text-left group ${
                     form.financial_goal === goal.value
-                      ? "border-accent bg-accent/5 shadow-lg shadow-accent/5"
-                      : "border-border bg-surface hover:border-accent/30"
+                      ? "border-green-500 bg-green-50 shadow-lg"
+                      : "border-gray-200 bg-white hover:border-green-400 shadow-sm"
                   }`}
                 >
                   <div className="text-2xl mb-2">{goal.emoji}</div>

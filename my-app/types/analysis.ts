@@ -6,6 +6,7 @@ export interface AnalysisResult {
   savings_score: number;
   emotional_message: string;
   spending_breakdown: Record<string, number>;
+  blockchain_tx?: string;
 }
 
 export interface AnalysisStatusResponse {

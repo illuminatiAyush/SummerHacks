@@ -2,24 +2,23 @@ from schemas.graph_state import ExpenseGraphState
 
 def projection_node(state: ExpenseGraphState):
     """
-    Calculate 5-year financial impact.
+    Calculate 5-year financial impact based on dynamic parsing logic.
     """
-    monthly_waste = state.get("monthly_waste", 0)
-    annual_return = 0.08
-    months = 60
+    transactions = state.get("parsed_transactions", [])
     
-    # Raw loss
-    raw_5_year_loss = monthly_waste * 60
-    
-    # Future invested value (Compound Interest Formula)
-    # FV = P * (((1 + r)^n - 1) / r)
-    monthly_rate = annual_return / 12
-    if monthly_rate > 0:
-        future_invested_value = monthly_waste * (((1 + monthly_rate) ** months - 1) / monthly_rate)
+    # Ensure there are transactions, fallback cleanly
+    if not transactions:
+        monthly_waste = state.get("monthly_waste", 0)
     else:
-        future_invested_value = raw_5_year_loss
-        
+        # Calculate exactly from actual parsed statements
+        monthly_waste = sum(t.get("amount", 0) for t in transactions)
+    
+    yearly = monthly_waste * 12
+    five_year_loss = yearly * 5
+    invested_value = int(yearly * 5 * 1.2)  # simple growth assumption
+    
     return {
-        "raw_5_year_loss": int(raw_5_year_loss),
-        "future_invested_value": int(future_invested_value)
+        "monthly_waste": monthly_waste,
+        "raw_5_year_loss": five_year_loss,
+        "future_invested_value": invested_value
     }

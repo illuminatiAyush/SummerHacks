@@ -15,7 +15,7 @@ export default function Header() {
       "/money-mirror": "Money Mirror",
       "/protocol": "Protocol",
       "/stake": "Stake",
-      "/trajectory": "Trajectory",
+
       "/streaks": "Streaks",
       "/network": "Network",
       "/settings": "Settings",

@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional, List, Dict
+from typing import TypedDict, Optional, List, Dict, Any
 
 class ExpenseGraphState(TypedDict):
     payload_id: str
@@ -18,6 +18,13 @@ class ExpenseGraphState(TypedDict):
     raw_5_year_loss: int
     future_invested_value: int
 
+    # Advanced AI insight fields
     emotional_message: str
+    money_mirror_prediction: str
+    good_habits: List[str]
+    trigger_genome: str
+    trend_detection: str
+    raw_input_echo: str
+    before_after_projection: Dict[str, Any]
 
     error: Optional[str]

@@ -6,6 +6,21 @@ export interface DashboardState {
   fiveYearLoss: number;
   potentialValue: number;
   
+  // AI insight fields
+  insight: string;
+  goodHabits: string[];
+  triggerGenome: string;
+  mirrorPrediction: string;
+  trendDetection: string;
+  highestSpendCategory: string;
+  beforeAfterProjection: {
+    waste_before: number;
+    waste_after: number;
+    saved_monthly: number;
+    future_saved_5_years: number;
+  } | null;
+  spendingBreakdown: Record<string, number>;
+
   challenge: {
     title: string;
     progress: number;
@@ -18,17 +33,21 @@ export interface DashboardState {
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
-  savingsScore: 72,
-  monthlyWaste: 4500,
-  fiveYearLoss: 270000,
-  potentialValue: 330000,
+  savingsScore: 0,
+  monthlyWaste: 0,
+  fiveYearLoss: 0,
+  potentialValue: 0,
+
+  insight: "",
+  goodHabits: [],
+  triggerGenome: "",
+  mirrorPrediction: "",
+  trendDetection: "",
+  highestSpendCategory: "",
+  beforeAfterProjection: null,
+  spendingBreakdown: {},
   
-  challenge: {
-    title: "Reduce Food Delivery",
-    progress: 60,
-    daysLeft: 18,
-    stake: 0.05,
-  },
+  challenge: null,
 
   setMetrics: (metrics) => set((state) => ({ ...state, ...metrics })),
   setChallenge: (challenge) => set({ challenge }),

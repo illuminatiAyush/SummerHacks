@@ -12,18 +12,18 @@
   --radius: 0.625rem;
   --accent: #22C55E;
   
-  /* Light Theme (Default) */
-  --bg-base: #FAFAFA;
+  /* Light Theme (Default & Primary for Demo) */
+  --bg-base: #f6f7f9;
   --bg-surface: #FFFFFF;
   --bg-card: #FFFFFF;
-  --text-primary: #111111;
-  --text-secondary: #52525B;
-  --text-muted: #A1A1AA;
-  --border-subtle: rgba(0, 0, 0, 0.05);
-  --border-active: rgba(0, 0, 0, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --text-primary: #000000;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border-subtle: #e5e7eb;
+  --border-active: #d1d5db;
+  --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.05);
-  --accent: #16A34A; /* Adjusted for light mode readability */
+  --accent: #16A34A;
 }
 
 :root.dark {
@@ -57,9 +57,8 @@
 }
 
 .premium-card:hover {
-  transform: translateY(-4px);
   border-color: var(--accent);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 :root.dark .premium-card:hover {
@@ -87,6 +86,7 @@
 html {
   font-family: var(--font-sans);
   scroll-behavior: smooth;
+  letter-spacing: -0.01em;
 }
 
 body {

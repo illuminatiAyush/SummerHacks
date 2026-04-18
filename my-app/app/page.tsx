@@ -45,9 +45,9 @@ export default function PremiumProtocolLanding() {
 
         <div className="relative z-10 w-full flex flex-col items-center max-w-4xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="w-full">
-            <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-serif leading-[0.95] tracking-tighter text-foreground mb-8">
+            <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-bold leading-[0.95] tracking-tighter text-black mb-8">
               Convenience is <br className="hidden md:block"/>
-              <span className="text-accent italic pr-2">stealing</span> your trajectory.
+              <span className="text-green-600 italic pr-2">stealing</span> your trajectory.
             </h1>
             
             <p className="text-2xl font-light text-secondary leading-relaxed mb-16 max-w-2xl mx-auto">
@@ -77,9 +77,9 @@ export default function PremiumProtocolLanding() {
                <span className="w-2 h-2 bg-red-500 rounded-full inline-block mr-3 animate-pulse" />
                Behavioral Crisis Audit
              </div>
-             <h2 className="text-6xl md:text-8xl lg:text-[7rem] font-serif leading-[0.95] tracking-tighter text-foreground">
-               The Cost of <br/><span className="text-red-500 italic">Ignorance.</span>
-             </h2>
+              <h2 className="text-6xl md:text-8xl lg:text-[7rem] font-bold leading-[0.95] tracking-tighter text-black">
+                The Cost of <br/><span className="text-red-600 italic">Ignorance.</span>
+              </h2>
            </ScrollReveal>
            <ScrollReveal className="md:w-[45%] md:max-w-md md:text-left mt-4 md:mt-0">
              <p className="text-2xl font-light text-secondary leading-relaxed">
@@ -118,7 +118,7 @@ export default function PremiumProtocolLanding() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.15)_0%,transparent_70%)] pointer-events-none" />
         
         <ScrollReveal className="text-center max-w-3xl mx-auto mb-20 relative z-10">
-          <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-6">We make the invisible visible.</h2>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">We make the invisible visible.</h2>
           <p className="text-xl text-white/50 font-light">
             An intelligent system designed to strip away the illusion of low-cost habits, revealing their true future cost and creating algorithmic accountability.
           </p>
@@ -128,7 +128,7 @@ export default function PremiumProtocolLanding() {
            <FeatureCard 
              icon={<LineChart className="w-5 h-5 text-accent" />}
              title="Real-time Cost Projection"
-             desc="Instantly translate a $15 lunch into a mathematically projected 5-year opportunity cost."
+             desc="Instantly translate a ₹15 lunch into a mathematically projected 5-year opportunity cost."
              dark={true}
            />
            <FeatureCard 
@@ -150,7 +150,7 @@ export default function PremiumProtocolLanding() {
       <section className="py-32 px-6 bg-background border-y border-border">
         <div className="max-w-6xl mx-auto">
           <ScrollReveal className="mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-6 text-foreground">See the cost before it compounds.</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-black">See the cost before it compounds.</h2>
           </ScrollReveal>
 
           <div className="flex flex-col lg:flex-row gap-16 items-center">
@@ -159,7 +159,7 @@ export default function PremiumProtocolLanding() {
                   Our analysis engine doesn't just categorize your spending—it projects it. By standardizing your daily habits against median market returns, we show you the exact amount of capital you are deleting from your future. 
                 </p>
                 <p className="text-lg font-light text-secondary leading-relaxed">
-                  When a $20 habit becomes a $20,000 loss, the decision to stop becomes effortless.
+                  When a ₹20 habit becomes a ₹20,000 loss, the decision to stop becomes effortless.
                 </p>
              </div>
              
@@ -170,7 +170,7 @@ export default function PremiumProtocolLanding() {
                    whileInView={{ opacity: 1, y: 0 }}
                    viewport={{ once: true }}
                    transition={{ duration: 0.8 }}
-                   className="bg-surface border border-border rounded-2xl p-8 shadow-2xl shadow-black/[0.04]"
+                   className="bg-white border border-gray-200 rounded-2xl p-8 shadow-2xl shadow-black/[0.04]"
                 >
                    <div className="flex justify-between items-center mb-8 border-b border-border pb-4">
                      <span className="text-xs font-mono uppercase tracking-widest text-accent font-bold">System Output</span>
@@ -179,12 +179,12 @@ export default function PremiumProtocolLanding() {
 
                    <div className="space-y-6">
                       <div className="flex justify-between items-end">
-                         <span className="text-sm font-medium text-secondary">Target Habit:</span>
-                         <span className="text-xl font-serif text-foreground">Food Delivery</span>
+                          <span className="text-sm font-bold text-gray-400">Target Habit:</span>
+                          <span className="text-xl font-bold text-black">Food Delivery</span>
                       </div>
                       <div className="flex justify-between items-end">
                          <span className="text-sm font-medium text-secondary">Estimated Frequency:</span>
-                         <span className="text-xl font-serif text-foreground">4x / week</span>
+                         <span className="text-xl font-bold text-foreground">4x / week</span>
                       </div>
                       
                       <div className="h-px w-full bg-border my-4" />
@@ -193,10 +193,9 @@ export default function PremiumProtocolLanding() {
                          <span className="text-sm font-medium text-secondary">Projected Impact</span>
                       </div>
                       <div>
-                         <span className="text-[10px] font-mono text-red-500 uppercase tracking-widest font-bold mb-1 block">5-Year Capital Loss</span>
-                         <div className="text-5xl font-serif tracking-tighter text-red-500 flex items-center">
-                            <CountUp number={23400} prefix="$" suffix="+" duration={1.5} />
-                         </div>
+                          <div className="text-5xl font-bold tracking-tighter text-red-600 flex items-center">
+                             <CountUp number={23400} prefix="₹" suffix="+" duration={1.5} />
+                          </div>
                       </div>
                    </div>
                 </motion.div>
@@ -216,7 +215,7 @@ export default function PremiumProtocolLanding() {
                <span className="w-2 h-2 bg-accent rounded-full inline-block mr-3" />
                Execution Engine
              </div>
-             <h2 className="text-5xl md:text-7xl font-serif tracking-tighter text-foreground mb-4">The Discipline Pipeline</h2>
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black mb-4">The Discipline Pipeline</h2>
              <p className="text-xl text-secondary font-light">Watch how a single receipt transforms your trajectory.</p>
           </div>
 
@@ -248,7 +247,7 @@ export default function PremiumProtocolLanding() {
                  side="left"
                  step="03" 
                  title="Future Loss Shown" 
-                 component={<div className="text-4xl font-serif text-red-500 font-bold tracking-tighter">-$42,050<div className="text-xs font-mono text-muted mt-1 uppercase">5-Year Impact</div></div>} 
+                 component={<div className="text-4xl font-bold text-red-500 tracking-tighter">-₹42,050<div className="text-xs font-mono text-muted mt-1 uppercase">5-Year Impact</div></div>} 
                />
                <StoryNode 
                  side="right"
@@ -272,9 +271,9 @@ export default function PremiumProtocolLanding() {
                  step="06" 
                  title="Reward Issued" 
                  component={
-                   <motion.div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-accent/80 to-accent flex items-center justify-center shadow-lg shadow-accent/20" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                     <BadgeCheck className="w-10 h-10 text-background" />
-                   </motion.div>
+                    <motion.div className="w-20 h-20 mx-auto rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-200" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                      <BadgeCheck className="w-10 h-10 text-white" />
+                    </motion.div>
                  } 
                />
              </div>
@@ -286,24 +285,24 @@ export default function PremiumProtocolLanding() {
       <section className="py-24 px-6 bg-surface border-y border-border">
         <div className="max-w-6xl mx-auto">
           <ScrollReveal className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif tracking-tight text-foreground">Designed for real behavior change.</h2>
+             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-black">Designed for real behavior change.</h2>
           </ScrollReveal>
 
           <div className="grid md:grid-cols-3 gap-12 text-center md:text-left">
              <div className="bg-background border border-border p-8 rounded-xl group hover:border-accent/30 transition-all">
-               <h4 className="text-xl font-serif font-bold mb-3 text-foreground">Clarity First</h4>
+                <h4 className="text-xl font-bold mb-3 text-black">Clarity First</h4>
                <p className="text-secondary font-light text-sm leading-relaxed">
                  Behavior only changes when the true magnitude of a habit is understood. Users see the real financial impact of every small slip.
                </p>
              </div>
              <div className="bg-background border border-border p-8 rounded-xl group hover:border-accent/30 transition-all">
-               <h4 className="text-xl font-serif font-bold mb-3 text-foreground">Skin in the Game</h4>
+               <h4 className="text-xl font-bold mb-3 text-black">Skin in the Game</h4>
                <p className="text-secondary font-light text-sm leading-relaxed">
                  Willpower depletes. Financial deposits do not. True commitment is backed by actionable, locked capital.
                </p>
              </div>
              <div className="bg-background border border-border p-8 rounded-xl group hover:border-accent/30 transition-all">
-               <h4 className="text-xl font-serif font-bold mb-3 text-foreground">Accountability Layer</h4>
+               <h4 className="text-xl font-bold mb-3 text-black">Accountability Layer</h4>
                <p className="text-secondary font-light text-sm leading-relaxed">
                  Strict verification protocols ensure you cannot lie to yourself. Integrity is enforced through mathematics.
                </p>
@@ -315,7 +314,7 @@ export default function PremiumProtocolLanding() {
       {/* 8. IMPACT SECTION */}
       <section className="py-32 px-6 max-w-5xl mx-auto text-center border-b border-border">
          <ScrollReveal>
-           <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-foreground">Small habits. Massive outcomes.</h2>
+           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-black">Small habits. Massive outcomes.</h2>
            <p className="text-xl text-secondary font-light mb-16 max-w-2xl mx-auto">
              Statistical probability dictates that eliminating micro-waste yields macroscopic wealth retention.
            </p>
@@ -348,7 +347,7 @@ export default function PremiumProtocolLanding() {
               <div className="inline-flex items-center px-4 py-1.5 bg-accent/10 text-accent text-xs uppercase font-bold tracking-widest rounded-full mb-6">
                 Protocol Utilization
               </div>
-              <h2 className="text-4xl md:text-5xl font-serif tracking-tight text-foreground mb-4">Built for modern financial behavior.</h2>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-black mb-4">Built for modern financial behavior.</h2>
            </ScrollReveal>
 
            <div className="grid md:grid-cols-3 gap-6">
@@ -379,7 +378,7 @@ export default function PremiumProtocolLanding() {
            viewport={{ once: true }}
            transition={{ duration: 1, ease: "easeOut" }}
          >
-           <h2 className="text-5xl md:text-[5rem] lg:text-[7rem] font-serif font-medium tracking-tight leading-[1] mb-6 text-foreground">
+           <h2 className="text-5xl md:text-[5rem] lg:text-[7rem] font-bold tracking-tight leading-[1] mb-6 text-black">
              Wealth isn't earned.<br/>It's retained.
            </h2>
            <p className="text-lg text-muted font-light tracking-wide uppercase font-mono text-[11px]">
@@ -391,7 +390,7 @@ export default function PremiumProtocolLanding() {
       {/* 11. FINAL CTA SECTION */}
       <section className="py-32 px-6 bg-surface text-center border-y border-border">
         <ScrollReveal className="max-w-2xl mx-auto">
-           <h2 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-foreground">Start seeing the real cost.</h2>
+           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-black">Start seeing the real cost.</h2>
            <p className="text-xl text-secondary font-light mb-10">Clarity changes behavior.</p>
            <Link href="/login" className="inline-flex items-center gap-2 px-10 py-5 bg-foreground text-background rounded-full text-sm font-bold tracking-widest uppercase hover:bg-accent hover:text-white transition-all shadow-xl shadow-black/10">
              Analyze Expense <ArrowRight size={16} />
@@ -406,7 +405,7 @@ export default function PremiumProtocolLanding() {
             <div className="max-w-sm">
               <div className="flex items-center gap-2 font-medium tracking-tight mb-4">
                 <div className="w-4 h-4 bg-accent rounded-sm" />
-                <span className="font-serif italic font-bold text-foreground">ExpenseAutopsy</span>
+                <span className="font-bold text-black">ExpenseAutopsy</span>
               </div>
               <p className="text-sm font-light text-secondary leading-relaxed">
                 Behavioral finance, simplified.
@@ -459,7 +458,7 @@ function FeatureCard({ icon, title, desc, dark }: any) {
        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mb-6 border", dark ? "bg-black/50 border-white/10" : "bg-background border-border")}>
          {icon}
        </div>
-       <h3 className="text-lg font-bold font-serif mb-2 tracking-tighter">{title}</h3>
+       <h3 className="text-lg font-bold mb-2 tracking-tight text-black">{title}</h3>
        <p className={cn("text-sm font-light leading-relaxed", dark ? "text-white/50" : "text-secondary")}>{desc}</p>
     </div>
   );
@@ -471,7 +470,7 @@ function TargetCard({ icon, title, desc }: any) {
        <div className="mb-4 transition-transform group-hover:scale-110">
          {icon}
        </div>
-       <h3 className="text-lg font-bold font-serif mb-2 text-foreground tracking-tight">{title}</h3>
+       <h3 className="text-lg font-bold mb-2 text-black tracking-tight">{title}</h3>
        <p className="text-sm text-secondary font-light leading-relaxed">{desc}</p>
     </div>
   );
@@ -494,7 +493,7 @@ function StoryNode({ side, step, title, component }: any) {
          transition={{ duration: 0.8, ease: "easeOut" }}
          className={cn("w-full md:w-1/2 pl-10 md:pl-0", side === "left" ? "md:text-right" : "md:text-left")}
        >
-         <h4 className="text-2xl font-serif mb-6 md:mb-0 text-foreground">{title}</h4>
+         <h4 className="text-2xl font-bold mb-6 md:mb-0 text-black">{title}</h4>
        </motion.div>
 
        <motion.div 
@@ -521,7 +520,7 @@ function StatCard({ value, prefix, suffix, label, icon, noNum }: any) {
      <div ref={ref} className="p-8 border border-border rounded-xl bg-surface flex flex-col items-center justify-center text-center shadow-sm premium-card transition-all group">
         <div className="h-16 flex items-center justify-center mb-2">
            {noNum && icon ? icon : (
-             <div className="text-5xl font-serif tracking-tighter text-foreground flex items-center">
+             <div className="text-5xl font-bold tracking-tighter text-black flex items-center">
                {prefix && <span className="text-3xl opacity-50 pb-1 pr-1">{prefix}</span>}
                {isInView ? <CountUp number={value} /> : "0"}
                {suffix && <span className="text-3xl pb-1 pl-1">{suffix}</span>}
@@ -583,7 +582,7 @@ function ProblemCard({ badge, imgSrc, title, desc, location }: any) {
         <div className="flex items-center gap-2 text-[10px] font-bold text-muted uppercase tracking-widest mb-4">
           <Activity className="w-3.5 h-3.5 text-accent" /> {location}
         </div>
-        <h3 className="text-3xl font-serif font-bold tracking-tight text-foreground mb-4">{title}</h3>
+        <h3 className="text-3xl font-bold tracking-tight text-black mb-4">{title}</h3>
         <p className="text-sm font-medium text-secondary leading-relaxed mb-8 flex-1">
           {desc}
         </p>

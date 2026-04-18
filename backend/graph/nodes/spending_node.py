@@ -35,5 +35,5 @@ def spending_node(state: ExpenseGraphState):
     return {
         "spending_breakdown": final_breakdown,
         "highest_spend_category": highest_cat,
-        "monthly_waste": highest_amount
+        "monthly_waste": sum(final_breakdown.values())
     }

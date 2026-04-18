@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Analysis", href: "/analysis" },
   { label: "Protocol", href: "/protocol" },
-  { label: "Trajectory", href: "/trajectory" },
+
   { label: "Network", href: "/network" },
 ];
 

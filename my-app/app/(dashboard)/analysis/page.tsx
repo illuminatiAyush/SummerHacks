@@ -7,7 +7,6 @@ import {
   Upload, FileText, X, Target, ArrowRight, Loader2,
   TrendingDown, PieChart, Brain, Sparkles, BarChart3, AlertTriangle
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
 
 type Status = "idle" | "uploading" | "running" | "completed" | "error";
 
@@ -56,16 +55,30 @@ export default function AnalysisPage() {
     if (f) setFile(f);
   }, []);
 
+  // Auto-submit immediately when a file is chosen or dropped
+  useEffect(() => {
+    if (file && (status === "idle" || status === "error")) {
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file]);
+
   const handleSubmit = async () => {
-    if (!goal || !stipend) return;
     setStatus("uploading");
     setError("");
 
     try {
       let input = rawText;
+      let filename = "input.txt";
       
       if (!input && file) {
-        input = `Statement uploaded: ${file.name} (simulated extraction)`;
+        filename = file.name;
+        input = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
       }
       
       if (!input && !file) {
@@ -87,8 +100,9 @@ export default function AnalysisPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           raw_input: input,
-          monthly_stipend: parseFloat(stipend),
-          big_goal: goal,
+          filename: filename,
+          stipend: stipend ? parseFloat(stipend) : 15000,
+          goal: goal || "Financial Freedom",
         }),
       });
 
@@ -115,13 +129,13 @@ export default function AnalysisPage() {
           const analysis = data.agent_analysis;
           // Map the backend response to our result format
           setResult({
-            highest_spend_category: analysis.highest_spend_category || "Food Delivery",
-            monthly_waste: analysis.monthly_waste || 4500,
-            raw_5_year_loss: analysis.compounded_five_year_cost || 270000,
-            future_invested_value: analysis.future_invested_value || 330000,
-            savings_score: analysis.savings_score || 72,
-            emotional_message: analysis.future_self_message || analysis.emotional_message || "Your daily habits are silently eroding your financial future.",
-            spending_breakdown: analysis.spending_breakdown || { "Food Delivery": 2100, "Shopping": 1200, "Entertainment": 800 },
+            highest_spend_category: analysis.highest_spend_category || "None",
+            monthly_waste: analysis.monthly_waste ?? 0,
+            raw_5_year_loss: analysis.raw_5_year_loss ?? 0,
+            future_invested_value: analysis.future_invested_value ?? 0,
+            savings_score: analysis.savings_score ?? 0,
+            emotional_message: analysis.emotional_message || "Your daily habits are silently eroding your financial future.",
+            spending_breakdown: analysis.spending_breakdown || {},
           });
           setStatus("completed");
           clearInterval(interval);
@@ -129,13 +143,6 @@ export default function AnalysisPage() {
           // Save to localStorage for downstream pages
           localStorage.setItem("ea_analysis", JSON.stringify(analysis));
           localStorage.setItem("ea_payload_id", payloadId);
-        } else if (data.status === "awaiting_hitl") {
-          // Auto-approve the HITL gate for MVP flow so it doesn't hang forever
-          await fetch(`/api/analysis/approve/${payloadId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ decision: "approved" }),
-          });
         } else if (data.status === "error") {
           setError("Analysis failed");
           setStatus("error");
@@ -154,17 +161,16 @@ export default function AnalysisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
-      <Navbar />
-      <div className="max-w-5xl mx-auto px-6 pt-12 pb-32">
+    <div className="min-h-screen bg-white text-black font-sans">
+      <div className="max-w-5xl mx-auto px-6 pt-6 pb-32">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="mb-2 inline-flex items-center px-3 py-1 bg-accent/10 text-accent text-[10px] uppercase font-bold tracking-widest rounded-full">
-            <span className="w-1.5 h-1.5 bg-accent rounded-full mr-2 animate-pulse" />
+          <div className="mb-2 inline-flex items-center px-3 py-1 bg-black/5 text-black text-[10px] uppercase font-bold tracking-widest rounded-full">
+            <span className="w-1.5 h-1.5 bg-black rounded-full mr-2 animate-pulse" />
             {dataSource === "bank" ? "Bank Connected" : "Manual Upload"} • AI Autopsy Engine
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">Financial Autopsy</h1>
-          <p className="text-lg font-medium text-secondary mb-10">Upload your spending data. Our AI dissects every rupee.</p>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-black mb-1">Financial Autopsy</h1>
+          <p className="text-lg font-medium text-gray-500 mb-10">Upload your spending data. Our AI dissects every rupee.</p>
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -178,7 +184,7 @@ export default function AnalysisPage() {
                   <div
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleFileDrop}
-                    className="bg-surface border-2 border-dashed border-border rounded-2xl p-10 text-center hover:border-accent/40 transition-colors cursor-pointer group"
+                    className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-10 text-center hover:border-green-400 transition-colors cursor-pointer group shadow-sm"
                     onClick={() => document.getElementById("file-input")?.click()}
                   >
                     <input id="file-input" type="file" className="hidden" accept=".pdf,.csv,.png,.jpg,.jpeg" onChange={(e) => setFile(e.target.files?.[0] || null)} />
@@ -206,7 +212,7 @@ export default function AnalysisPage() {
                       value={rawText}
                       onChange={(e) => setRawText(e.target.value)}
                       rows={5}
-                      className="w-full p-4 bg-surface border border-border rounded-xl text-foreground placeholder-muted focus:outline-none focus:border-accent transition-colors text-sm font-mono resize-none"
+                      className="w-full p-4 bg-white border border-gray-200 rounded-xl text-black placeholder-gray-400 focus:outline-none focus:border-black transition-colors text-sm font-mono resize-none shadow-sm"
                       placeholder={"Zomato - ₹350\nAmazon - ₹1200\nNetflix - ₹649\nSwiggy - ₹280\n..."}
                     />
                   </div>
@@ -220,7 +226,7 @@ export default function AnalysisPage() {
 
                 {/* Right: Goal + Stipend */}
                 <div className="lg:col-span-2 space-y-6">
-                  <div className="bg-surface border border-border rounded-xl p-6">
+                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[10px] font-bold text-secondary uppercase tracking-widest mb-4">
                       <Target className="w-3 h-3 text-accent" /> Analysis Parameters
                     </div>
@@ -232,7 +238,7 @@ export default function AnalysisPage() {
                           type="number"
                           value={stipend}
                           onChange={(e) => setStipend(e.target.value)}
-                          className="w-full p-3 bg-background border border-border rounded-lg text-foreground font-mono focus:outline-none focus:border-accent transition-colors"
+                          className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-black font-mono focus:outline-none focus:border-black transition-colors"
                           placeholder="15000"
                         />
                       </div>
@@ -259,7 +265,7 @@ export default function AnalysisPage() {
 
                   <button
                     onClick={handleSubmit}
-                    disabled={!goal || !stipend}
+                    disabled={(!file && !rawText) || !stipend || !goal}
                     className="w-full py-4 bg-accent text-white rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-accent/90 transition-all flex items-center justify-center gap-2 disabled:opacity-20 disabled:cursor-not-allowed shadow-xl shadow-accent/20"
                   >
                     <Sparkles className="w-4 h-4" /> Run Autopsy
@@ -319,7 +325,7 @@ export default function AnalysisPage() {
               {/* Bento Grid Results */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {/* Savings Score */}
-                <div className="bg-surface border border-border rounded-2xl p-8 flex flex-col items-center justify-center text-center premium-card">
+                <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
                   <div className="relative w-28 h-28 mb-6">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" strokeWidth="6" />
@@ -341,7 +347,7 @@ export default function AnalysisPage() {
                 </div>
 
                 {/* Money Mirror */}
-                <div className="bg-surface border border-border rounded-2xl p-8 premium-card">
+                <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
                   <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-6 flex items-center gap-2">
                     <BarChart3 className="w-3 h-3 text-accent" /> Money Mirror
                   </h3>
@@ -364,7 +370,7 @@ export default function AnalysisPage() {
                 </div>
 
                 {/* Spending Breakdown */}
-                <div className="bg-surface border border-border rounded-2xl p-8 premium-card">
+                <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
                   <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-6 flex items-center gap-2">
                     <PieChart className="w-3 h-3 text-accent" /> Breakdown
                   </h3>
@@ -399,12 +405,12 @@ export default function AnalysisPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-surface border border-accent/20 rounded-2xl p-8 mb-8 premium-card"
+                className="bg-white border border-green-100 rounded-2xl p-8 mb-8 shadow-sm"
               >
                 <div className="flex items-center gap-2 text-[10px] font-bold text-accent uppercase tracking-widest mb-4">
                   <Brain className="w-3 h-3" /> AI Behavioral Coach
                 </div>
-                <p className="text-xl font-medium tracking-tight text-foreground leading-relaxed italic">
+                <p className="text-xl font-bold tracking-tight text-black leading-relaxed">
                   &ldquo;{result.emotional_message}&rdquo;
                 </p>
                 <p className="text-[10px] text-muted mt-4 uppercase tracking-widest font-bold">

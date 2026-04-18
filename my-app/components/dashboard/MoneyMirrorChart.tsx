@@ -10,22 +10,27 @@ import {
   ResponsiveContainer 
 } from "recharts";
 
-const data = [
-  { name: "Month 1", actual: 4000, projected: 4000 },
-  { name: "Month 3", actual: 3800, projected: 4200 },
-  { name: "Month 6", actual: 3500, projected: 4800 },
-  { name: "Month 9", actual: 3200, projected: 5500 },
-  { name: "Month 12", actual: 3000, projected: 6500 },
-  { name: "Month 18", actual: 2800, projected: 8000 },
-  { name: "Month 24", actual: 2500, projected: 12000 },
-];
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTheme } from "@/lib/hooks/useTheme";
 
-export default function MoneyMirrorChart() {
+interface MoneyMirrorChartProps {
+  wasteBefore?: number;
+  wasteAfter?: number;
+}
+
+export default function MoneyMirrorChart({ wasteBefore = 4000, wasteAfter = 2500 }: MoneyMirrorChartProps) {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+
+  const data = useMemo(() => {
+    return [
+      { name: "Month 3", waste: 2000, save: 1000 },
+      { name: "Month 6", waste: 4000, save: 2000 },
+      { name: "Month 9", waste: 7000, save: 3000 },
+      { name: "Month 12", waste: 12000, save: 5000 },
+      { name: "Month 24", waste: 30000, save: 12000 }
+    ];
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -47,15 +52,15 @@ export default function MoneyMirrorChart() {
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
-          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+          margin={{ top: 20, right: 10, left: 0, bottom: 0 }}
         >
           <defs>
-            <linearGradient id="colorProjected" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={accentGreen} stopOpacity={0.3} />
+            <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={accentGreen} stopOpacity={0.4} />
               <stop offset="95%" stopColor={accentGreen} stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={accentRed} stopOpacity={0.2} />
+            <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={accentRed} stopOpacity={0.3} />
               <stop offset="95%" stopColor={accentRed} stopOpacity={0} />
             </linearGradient>
           </defs>
@@ -68,45 +73,68 @@ export default function MoneyMirrorChart() {
             dataKey="name" 
             axisLine={false}
             tickLine={false}
-            tick={{ fill: tickColor, fontSize: 10, fontWeight: 700 }}
+            tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }}
             dy={10}
           />
-          <YAxis 
-            hide 
-          />
+          <YAxis hide />
           <Tooltip 
+            formatter={(value: any, name: any) => {
+              const numVal = Number(value);
+              if (name === "waste") return [`₹${numVal.toLocaleString()} wasted`, "Baseline (Red)"];
+              if (name === "save") return [`₹${numVal.toLocaleString()} saved`, "Optimized (Green)"];
+              return [`₹${numVal.toLocaleString()}`, String(name)];
+            }}
             contentStyle={{ 
               backgroundColor: tooltipBg, 
               border: `1px solid ${tooltipBorder}`, 
               borderRadius: "8px",
-              boxShadow: "none"
+              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
             }}
-            itemStyle={{ fontSize: "12px", fontWeight: 700, color: tooltipText, textTransform: "uppercase" }}
-            labelStyle={{ display: "none" }}
+            itemStyle={{ fontSize: "13px", fontWeight: 700 }}
+            labelStyle={{ color: tickColor, marginBottom: "8px", fontWeight: 600 }}
           />
           <Area 
             type="monotone" 
-            dataKey="projected" 
+            name="waste"
+            dataKey="waste" 
+            stroke={accentRed} 
+            strokeWidth={3}
+            fillOpacity={1} 
+            fill="url(#redGradient)" 
+            isAnimationActive={true}
+            animationDuration={800}
+            animationEasing="ease-in-out"
+            activeDot={{ r: 6, strokeWidth: 0 }}
+          />
+          <Area 
+            type="monotone" 
+            name="save"
+            dataKey="save" 
             stroke={accentGreen} 
             strokeWidth={3}
             fillOpacity={1} 
-            fill="url(#colorProjected)" 
-            name="Compounded Value"
+            fill="url(#greenGradient)" 
             isAnimationActive={true}
-            animationDuration={1500}
-            animationEasing="ease-out"
-          />
-          <Area 
-            type="monotone" 
-            dataKey="actual" 
-            stroke={accentRed} 
-            strokeDasharray="4 4"
-            strokeWidth={2}
-            fillOpacity={0}
-            name="Baseline Trajectory"
-            isAnimationActive={true}
-            animationDuration={1800}
-            animationEasing="ease-out"
+            animationDuration={800}
+            animationEasing="ease-in-out"
+            dot={(props: any) => {
+              const { cx, cy, payload } = props;
+              if (payload.name === "Month 9") {
+                return (
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={6}
+                    fill={accentGreen}
+                    stroke={tooltipBg}
+                    strokeWidth={2}
+                    key={`dot-${payload.name}`}
+                  />
+                );
+              }
+              return <svg key={`empty-${payload?.name || Math.random()}`}></svg>;
+            }}
+            activeDot={{ r: 6, strokeWidth: 0 }}
           />
         </AreaChart>
       </ResponsiveContainer>
